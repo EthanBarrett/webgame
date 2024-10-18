@@ -22,15 +22,15 @@ Body.position.y = -5;
 const geometry2 = new THREE.BoxGeometry( 3, 7, 2.5 ); 
 const material2 = new THREE.MeshBasicMaterial( {color: 0x00fff0} ); 
 const RightArm = new THREE.Mesh( geometry2, material2 ); 
-RightArm.position.x = 7;
-RightArm.position.y = -5;
+RightArm.position.x = 6;
+RightArm.position.y = -4;
 RightArm.rotation.z = 0.5;
 //leftarm
 const geometry3 = new THREE.BoxGeometry( 3, 7, 2.5 ); 
 const material3 = new THREE.MeshBasicMaterial( {color: 0x00fff0} ); 
 const LeftArm = new THREE.Mesh( geometry3, material3 ); 
-LeftArm.position.x = -7;
-LeftArm.position.y = -5;
+LeftArm.position.x = -6;
+LeftArm.position.y = -4;
 LeftArm.rotation.z = -0.5;
 //Legs
 const geometry4 = new THREE.ConeGeometry( 6, 15, 32 ); 
@@ -64,6 +64,7 @@ function animate() {
 
 	Head.rotation.x += 0.01;
 	group.rotation.y += 0.01;
+	RightArm.rotation.y =0;
 
 	renderer.render( scene, camera );
 
