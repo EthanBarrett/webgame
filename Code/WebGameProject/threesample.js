@@ -4,6 +4,12 @@ import { OrbitControls } from 'https://unpkg.com/three@0.157.0/examples/jsm/cont
 
 import {GLTFLoader} from "https://unpkg.com/three@0.169.0/examples/jsm/loaders/GLTFLoader.js";
 
+import Stats from  'https://unpkg.com/three@0.169.0/examples/jsm/libs/stats.module.js';
+
+let stats;
+
+stats = new Stats();
+document.body.appendChild( stats.dom );
 
 
 let controls; //declare control parameter
@@ -12,8 +18,9 @@ let controls; //declare control parameter
 let mixer;
 
 //add control variables
-let upstate = false; //button up
-let downstate = false; //button down
+let upstate = false; //button left
+let downstate = false; //button stop
+let right = false; //button right
 let changed = false; //colour change
 
 const scene = new THREE.Scene();
@@ -29,12 +36,12 @@ document.body.appendChild( renderer.domElement );
 
 //head
 const geometry = new THREE.SphereGeometry( 5, 15, 6 ); 
-const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } ); 
+const material = new THREE.MeshBasicMaterial( { color: 0x00FFFF } ); 
 const Head = new THREE.Mesh( geometry, material ); 
 Head.position.y = 4.8;
 //body
 const geometry1 = new THREE.CapsuleGeometry( 4, 4, 16, 32 ); 
-const material1 = new THREE.MeshBasicMaterial( {color: 0x00ff00} ); 
+const material1 = new THREE.MeshBasicMaterial( {color: 0x000000} ); 
 const Body = new THREE.Mesh( geometry1, material1 );
 Body.position.y = -5;
 //rightarm
@@ -53,7 +60,7 @@ LeftArm.position.y = -4;
 LeftArm.rotation.z = -0.5;
 //Legs
 const geometry4 = new THREE.ConeGeometry( 6, 15, 32 ); 
-const material4 = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+const material4 = new THREE.MeshBasicMaterial( {color: 0x000000} );
 const Legs = new THREE.Mesh(geometry4, material4 ); 
 Legs.position.y = -4
 
@@ -76,27 +83,86 @@ group.add(LeftArm);
 group.add(Legs);
 scene.add(group);
 
+group.position.y -= 4;
+
 
 //pillar tower
 const geometry5 = new THREE.CylinderGeometry( 15, 15, 60, 96 ); 
 const material5 = new THREE.MeshBasicMaterial( {color: 0xff0000} ); 
 const tower = new THREE.Mesh( geometry5, material5 ); 
-tower.position.x = 34;
+tower.position.x = 50;
 tower.position.y = 10;
-tower.position.z = -34;
+tower.position.z = -60;
 
 scene.add( tower );
 
 
 //floor
-const geometry6 = new THREE.PlaneGeometry( 200, 100 );
+const geometry6 = new THREE.PlaneGeometry( 200, 500 );
 const material6 = new THREE.MeshBasicMaterial( {color: 336699, side: THREE.DoubleSide} );
 const floor = new THREE.Mesh( geometry6, material6 );
 floor.rotation.x = 1.6;
 floor.position.y = -16;
 scene.add( floor );
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//create many random objects
+const createManyObjs=()=>
+{
+	const geometry = new THREE.SphereGeometry();
+	const objects = [];
+	for (let i = 0; i < 20; i++)
+	{
+		const material2 = new THREE.MeshPhongMaterial({color:0x2eabef});
 
-//////////////////////////////////////////////////////////////////
+const object = new THREE.Mesh(geometry, material2 );
+//random position
+object.position.x = Math.random() * 400 - 200;
+object.position.y = Math.random() * 50;
+object.position.z = Math.random() * 100 - 250;
+//random scale
+object.scale.x = Math.random() + 50 - 40;
+object.scale.y = Math.random() + 20 - 10;
+object.scale.z = Math.random() + 20;
+
+object.material.color.setHex(Math.random() * 0xffffff);
+scene.add(object);
+
+	objects.push(object);
+	}
+	return objects;
+}
+//move objects 
+const animateObjects = (objects) => {
+	requestAnimationFrame(() => animateObjects(objects)); // Continuously animate
+	
+	objects.forEach((object) => {
+	  // movment for objects
+	  object.position.z += 0.4; 
+  
+	});
+  };
+
+const objects = createManyObjs();
+animateObjects(objects);
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+// create sphere of points
+const pointgeometry = new THREE.SphereGeometry(20,40,20);
+
+const newmaterial = new THREE.PointsMaterial({color:'blue', size:0.5});
+let pointobj = new THREE.Points(pointgeometry, newmaterial);
+scene.add(pointobj);
+pointobj.position.y = 0;
+//create scecond bigger sphere around the first
+let mesh2 = pointobj.clone();
+mesh2.scale.set(2,2,2);
+scene.add(mesh2);
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 //change camera position
 camera.position.z = 50;
 
@@ -125,7 +191,7 @@ const materialAspectfloor = {
 }
 addPlane(0, -3.6, 60, 60, materialAspectfloor);
 
-//////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 // a function that will be called every time the window gets resized.
@@ -144,7 +210,7 @@ const onWindowResize = () => {
 }
  
 window.addEventListener('resize', onWindowResize);
-/////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //skybox function
 
@@ -166,7 +232,7 @@ const createskybox = ()=>{
 }
 
 createskybox();
-//////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 const createControls =()=>{
 	controls = new OrbitControls(camera, renderer.domElement);
@@ -175,49 +241,80 @@ const createControls =()=>{
 }
 
 createControls();
-/////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//button set up
 const moveup = ()=>
 {
 	upstate = true;
 	downstate = false;
+	right = true;
 }
 
 const movedown = ()=>
 	{
 		upstate = false;
 		downstate = true;
+		right = false;
 	}
+
+const moveright = ()=>
+{
+	right = true;
+	upstate = false;
+	downstate = false;
+}
 
 document.getElementById("upbutton").addEventListener("click", moveup);
 document.getElementById("downbutton").addEventListener("click", movedown);
+document.getElementById("rightbutton").addEventListener("click", moveright);
 
 
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 //animate
 function animate() {
+	//requestAnimationFrame (animate);
+	stats.update(); // update stats
 
-	Head.rotation.x += 0.01;
+	pointobj.rotation.x += 0.01;
+	mesh2.rotation.y += 0.01
+
+	Head.rotation.x += 0.05;
 	
+	
+
 	if(upstate)
 	{
-		group.position.z -=0.05;
+		group.position.x -= 0.6;
 		
 	} 
-	else if (downstate)
+	
+	else if(right)
+		{
+			group.position.x += 0.6;
+			
+		} 
+
+
+	if (downstate)
 	{
-		group.position.y -= 0.05;
+		group.position.y -= 0;
 	}
 
-	if (group.position.y > 3)
+	
+	
+	if (group.position.x < -80)
 	{
 		
 		upstate = false;
+		right = false;
 	}
 
-	if (group.position.y < -3)
+	if (group.position.x > 80)
 	{
 		
-		downstate = false;
+		upstate = false;
+		right = false;
 	}
 
 	renderer.render( scene, camera );
